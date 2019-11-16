@@ -106,11 +106,11 @@ library(readstata13)
 
 #Read in github or CSv data
 #EAS<-read.csv("https://raw.githubusercontent.com/peterhurford/ea-data/master/data/2018/2018-ea-survey-anon-currencied-processed.csv",  stringsAsFactors=FALSE)
-EAS<-read.csv("~/Downloads/2019-ea-survey-anon-currencied-processed.csv")
 ##OR preprocessed data
 #library(readstata13)
 #EAS <- read.dta13("~/Downloads/EAsurvey2019_cleaned.dta")
 
+EAS<-read.csv("~/Downloads/2019-ea-survey-anon-currencied-processed.csv")
 attach(EAS)
 summary(EAS)
 
@@ -166,7 +166,9 @@ ggplot(EAS2, aes(x = education_ordered, fill=education_ordered)) +
   scale_y_continuous(labels = percent) + theme_tufte() +
   labs(title = "Distribution of Education", y = "Percent", x = "Type of Education")+ theme(legend.position = "none")
 ##Group education levels
-plyr::revalue(ses, c("low" = "small", "middle" = "medium", "high" = "large"))
+library(plyr)
+plyr::revalue(EAS2$education, c("Some high school","High school graduate","Some college, no degree"="No Degree", "Associate's degree","Bachelor's degree","Professional degree"= "Bachelor's/Associate/Professional Degree", "Master's degree","Doctoral degree"= "Post-graduate Degree"))
+print(levels(EAS2$education))
 
 library(car)
 (EAS2$educ<- recode(EAS2$education," c('Some high school','High school graduate','Some college, no degree')='No Degree'
