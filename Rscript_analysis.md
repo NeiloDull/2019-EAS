@@ -169,8 +169,10 @@ ggplot(EAS2, aes(x = education_ordered, fill=education_ordered)) +
 
 EAS2$educ <- EAS2$education
 levels(EAS2$educ) <- list(No_Degree=c("Some high school","High school graduate","Some college, no degree"),
-Bachelor_Associate_Professional_Degree= c("Associate's degree","Bachelor's degree","Professional degree"),
-Postgraduate_Degree=c("Master's degree","Doctoral degree"= "Post-graduate Degree"))
+Bachelors= c("Bachelor's degree"),
+Masters=c("Master's degree"),
+PhD=c("Doctoral degree"),
+Other_degree=c("Associate's degree","Professional degree"))
 print(levels(EAS2$educ))
 #get stats
 table(EAS2$educ)
@@ -186,12 +188,33 @@ ggplot(EAS3, aes(x = educ, fill=educ)) +
   geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
   scale_y_continuous(labels = percent) + theme_tufte() +
   labs(title = "Distribution of Education", y = "Percent", x = "Type of Education")+ theme(legend.position = "none")
-
-
-
 #Education: comparisons to 2018 42.6% BA, 30.4% MA, 14.4% PhD, 12% other college, 0.7% Non-College
 #Education: disciplines (bar)
+logical_vars <- lapply(EAS, class) == "logical"
+EAS[, logical_vars] <- lapply(EAS[, logical_vars], as.factor)
+
+table(EAS$studied_econ)
+table2 <- table(EAS$studied_econ)
+prop.table(table2)
+counts <- table(EAS$studied_econ)
+
+discipline <- table(EAS$studied_cs,EAS$studied_econ,
+EAS$studied_engineering ,
+EAS$studied_math ,
+EAS$studied_medicine, 
+EAS$studied_psych ,
+EAS$studied_phil, 
+EAS$studied_physics ,
+EAS$studied_humanities ,
+EAS$studied_social_science ,
+EAS$studied_other_science ,
+EAS$studied_vocational)
+discipline
+#create single discipline variable
+
+print(levels(dat$welcome))
 table(discipline)
+
 barplot(table(discipline), main="Discipline Distribution",
         xlab="Discipline",ylab = "Frequency")
 table2 <- table(discipline)
