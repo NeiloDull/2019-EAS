@@ -104,11 +104,12 @@ library(readstata13)
 
 #### LOAD DATA ####
 
-EAS<-read.csv("https://raw.githubusercontent.com/peterhurford/ea-data/master/data/2018/2018-ea-survey-anon-currencied-processed.csv",  stringsAsFactors=FALSE)
-EAS<-read.csv("~/Downloads/2018-ea-survey-edited-currencied.csv")
+#Read in github or CSv data
+#EAS<-read.csv("https://raw.githubusercontent.com/peterhurford/ea-data/master/data/2018/2018-ea-survey-anon-currencied-processed.csv",  stringsAsFactors=FALSE)
+EAS<-read.csv("~/Downloads/2019-ea-survey-anon-currencied-processed.csv")
 ##OR preprocessed data
-library(readstata13)
-EAS <- read.dta13("~/Downloads/EAsurvey2019_cleaned.dta")
+#library(readstata13)
+#EAS <- read.dta13("~/Downloads/EAsurvey2019_cleaned.dta")
 
 attach(EAS)
 summary(EAS)
@@ -118,39 +119,63 @@ summary(EAS)
 #Total sample size
 ##Age: distribution (histogram), median, mean
 
-EAS$age <- as.numeric(EAS$age)
+#continous age
+#EAS$age <- as.numeric(EAS$age)
+#gghistogram(EAS, x = "age", bins = 50, 
+            #add = "mean",main = "Distribution of Age")
 attach(EAS)
-gghistogram(EAS, x = "age", bins = 50, 
-            add = "mean",main = "Distribution of Age")
-mean(age, na.rm= T)
-median(age, na.rm= T)
-##Gender: descriptives
-table(sex)
-table2 <- table(sex)
+
+table(age)
+table2 <- table(age)
 prop.table(table2)
-EAS2<- na.omit(subset(EAS, select = c(sex)))
-ggplot(EAS2, aes(x = as.factor(sex), fill=sex)) +
+EAS$agenum <- as.numeric(EAS$age)
+attach(EAS)
+mean(agenum, na.rm= T)
+median(agenum, na.rm= T)
+##Gender: descriptives
+table(gender_b)
+table2 <- table(gender_b)
+prop.table(table2)
+EAS2<- na.omit(subset(EAS, select = c(gender_b)))
+EAS2$gender_ordered = factor(EAS2$gender_b,levels(EAS2$gender_b)[c(2,1,3)])
+ggplot(EAS2, aes(x = gender_ordered, fill=gender_ordered)) +
   geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
   geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
   scale_y_continuous(labels = percent) + theme_tufte() +
   labs(title = "Distribution of Gender", y = "Percent", x = "")+ theme(legend.position = "none")
+#Drop "other"
+
+
 #Gender: comparison to 2018
 #2018-  Male (1,592, 69.82% ) Female (688, 30.18%)
 ##Education: level (bar)
-table(college)
-table2 <- table(college)
+table(education)
+table2 <- table(education)
 prop.table(table2)
-counts <- table(college)
-barplot(prop.table(table2), main="College Distribution",
+counts <- table(education)
+barplot(prop.table(table2), main="Education Distribution",
         xlab="Level of Education",ylab = "Proportion")
 #proportions
 dev.off()
-EAS2<- na.omit(subset(EAS, select = c(college)))
-ggplot(EAS2, aes(x = as.factor(college), fill=college)) +
+EAS2<- na.omit(subset(EAS, select = c(education)))
+print(levels(education))
+EAS2$education_ordered = factor(EAS2$education,levels(EAS2$education)[c(8,4,7,1,2,6,5,3)])
+ggplot(EAS2, aes(x = education_ordered, fill=education_ordered)) +
   geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
   geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
   scale_y_continuous(labels = percent) + theme_tufte() +
   labs(title = "Distribution of Education", y = "Percent", x = "Type of Education")+ theme(legend.position = "none")
+##Group education levels
+plyr::revalue(ses, c("low" = "small", "middle" = "medium", "high" = "large"))
+
+library(car)
+(EAS2$educ<- recode(EAS2$education," c('Some high school','High school graduate','Some college, no degree')='No Degree'
+                   ; c('Associate's degree','Bachelor's degree','Professional degree')= 'Bachelor's/Associate/Professional Degree'
+                   ; c('Master's degree','Doctoral degree')= 'Post-graduate Degree'"
+                   ))
+
+EAS2$educ <- as.factor(EAS2$educ)
+print(levels(educ))
 #Education: comparisons to 2018 42.6% BA, 30.4% MA, 14.4% PhD, 12% other college, 0.7% Non-College
 #Education: disciplines (bar)
 table(discipline)
