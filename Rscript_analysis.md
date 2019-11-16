@@ -106,11 +106,11 @@ library(readstata13)
 
 #Read in github or CSv data
 #EAS<-read.csv("https://raw.githubusercontent.com/peterhurford/ea-data/master/data/2018/2018-ea-survey-anon-currencied-processed.csv",  stringsAsFactors=FALSE)
+EAS<-read.csv("~/Downloads/2019-ea-survey-anon-currencied-processed.csv")
 ##OR preprocessed data
 #library(readstata13)
 #EAS <- read.dta13("~/Downloads/EAsurvey2019_cleaned.dta")
 
-EAS<-read.csv("~/Downloads/2019-ea-survey-anon-currencied-processed.csv")
 attach(EAS)
 summary(EAS)
 
@@ -166,18 +166,29 @@ ggplot(EAS2, aes(x = education_ordered, fill=education_ordered)) +
   scale_y_continuous(labels = percent) + theme_tufte() +
   labs(title = "Distribution of Education", y = "Percent", x = "Type of Education")+ theme(legend.position = "none")
 ##Group education levels
-library(plyr)
-plyr::revalue(EAS2$education, c("Some high school","High school graduate","Some college, no degree"="No Degree", "Associate's degree","Bachelor's degree","Professional degree"= "Bachelor's/Associate/Professional Degree", "Master's degree","Doctoral degree"= "Post-graduate Degree"))
-print(levels(EAS2$education))
 
-library(car)
-(EAS2$educ<- recode(EAS2$education," c('Some high school','High school graduate','Some college, no degree')='No Degree'
-                   ; c('Associate's degree','Bachelor's degree','Professional degree')= 'Bachelor's/Associate/Professional Degree'
-                   ; c('Master's degree','Doctoral degree')= 'Post-graduate Degree'"
-                   ))
+EAS2$educ <- EAS2$education
+levels(EAS2$educ) <- list(No_Degree=c("Some high school","High school graduate","Some college, no degree"),
+Bachelor_Associate_Professional_Degree= c("Associate's degree","Bachelor's degree","Professional degree"),
+Postgraduate_Degree=c("Master's degree","Doctoral degree"= "Post-graduate Degree"))
+print(levels(EAS2$educ))
+#get stats
+table(EAS2$educ)
+table2 <- table(EAS2$educ)
+prop.table(table2)
+counts <- table(EAS2$educ)
+#plot
+dev.off()
+print(levels(EAS2$educ))
+EAS3<- na.omit(subset(EAS2, select = c(educ)))
+ggplot(EAS3, aes(x = educ, fill=educ)) +
+  geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
+  scale_y_continuous(labels = percent) + theme_tufte() +
+  labs(title = "Distribution of Education", y = "Percent", x = "Type of Education")+ theme(legend.position = "none")
 
-EAS2$educ <- as.factor(EAS2$educ)
-print(levels(educ))
+
+
 #Education: comparisons to 2018 42.6% BA, 30.4% MA, 14.4% PhD, 12% other college, 0.7% Non-College
 #Education: disciplines (bar)
 table(discipline)
