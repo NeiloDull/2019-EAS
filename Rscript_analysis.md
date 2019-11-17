@@ -306,68 +306,34 @@ https://forum.effectivealtruism.org/posts/S4WmbHJr32WcmwFD7/ea-survey-series-201
 #Excel/G-Sheet:Where first heard: year by year breakdown (Area Chart?)
 #Comparison of year by year (2019) to year by year (2018) 
 #(Area chart), (line chart) etc (absolute and proportions)
-#fExcel/G-Sheet:requency
-h<- barplot(table(eayear1), main="EAs first hearing of EA/ Total Eas",
-            xlab="Year",ylab = "Frequnecy")
-
-#% JOINED with % labels
-EAS2<- na.omit(subset(EAS, select = c(eayear1)))
-ggplot(EAS2, aes(x = as.factor(eayear1),)) +
-  geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
-  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
-  scale_y_continuous(labels = percent) + theme_classic() +
-  labs(title = "Distribution of Gender", y = "Percent", x = "")+ theme(legend.position = "none")
-
-#cumulative (denisty)
-counts <- table(eayear1)
-plot(ecdf(eayear1))
-#Cumulative Freq
-ec<-ggplot(data = EAS2 %>% group_by(eayear1) %>% summarise(n = n()), 
-           aes(x = eayear1, y = n)) + 
-  ylab("Total EAs") +
-  xlab("year Joined") +
-  geom_line(aes(y = cumsum(n)))
-
-#Overlap cumulative (density) plor and year-by-year histogram
-EAS2<- na.omit(subset(EAS, select = c(eayear1)))
-attach(EAS2)
-par(mar = c(5,5,2,5))
-h <- hist(
-  eayear1,xlim = c(2009,2019))
-
-par(new = T)
-
-ec <- ecdf(eayear1)
-plot(x = h$mids, y=ec(h$mids)*max(h$counts), col = rgb(0,0,0,alpha=0), axes=F, xlab=NA, ylab=NA)
-lines(x = h$mids, y=ec(h$mids)*max(h$counts), col ='red')
-axis(4, at=seq(from = 0, to = max(h$counts), length.out = 11), labels=seq(0, 1, 0.1), col = 'red', col.axis = 'red')
-mtext(side = 4, line = 3, 'Cumulative Density', col = 'red')
-
-##CUMULATIVE FREQ
-##### Make some sample data
-x <- EAS2$eayear1
-
-## Calculate and plot the two histograms
-hcum <- h <- hist(x, plot=FALSE)
-
-hcum$counts <- cumsum(hcum$counts)
-plot(hcum, main="EAs first hearing of EA/Total EAs", xlab="Year First heard of EA",plot=FALSE)
-plot(h, add=T, col="blue")
-
-## Plot the density and cumulative density
-d <- density(x)
-lines(x = d$x, y = d$y * length(x) * diff(h$breaks)[1], lwd = 2)
-lines(x = d$x, y = cumsum(d$y)/max(cumsum(d$y)) * length(x), lwd = 2)
-
+#Excel/G-Sheet:Frequency per first year
 
 #Getting involved: descriptives: (bar chart)
+table(EAS$involved_tlycs)	
+table(EAS$involved_local_EA)	
+table(EAS$involved_lesswrong)
+table(EAS$involved_givewell)
+table(EAS$involved_ace	)
+table(EAS$involved_ssc)	
+table(EAS$involved_online_ea)	
+table(EAS$involved_personal_contact)	
+table(EAS$involved_80K)	
+table(EAS$involved_GWWC	)
+table(EAS$involved_ea_global)	
+table(EAS$involved_ea_global_x)	
+table(EAS$involved_book_blog)	
+table(EAS$involved_podcast)	
+table(EAS$involved_swiss)	
+table(EAS$involved_none_of_the_above)	
+table(EAS$involved_other)
 #Getting involved: comparison to last year
+https://forum.effectivealtruism.org/posts/uPFx462NAamBo5Eqq/ea-survey-series-2018-how-do-people-get-involved-in-ea
 #Getting involved:  year by year breakdown
 #Comparison of 2019’s 2018 yby breakdown to 2018
 
 
 
-#### Donations ####
+#### Donations: Use Kim's Script! ####
 EAS2<- na.omit(subset(EAS, select = c(donate_2017_c_n, eayear)))
 #look for outliers
 outinc=max(EAnew$income_2018_individual_c,na.rm=TRUE)
@@ -460,31 +426,38 @@ Other influences on giving: year first heard EA descriptives (table) (line chart
 #Causes donated to: #donors, total donated, mean donation size (table)
 
 #### Cause Selection ####
+cause_import_animal_welfare	cause_import_cause_prioritization	cause_import_biosecurity	cause_import_climate_change	cause_import_nuclear_security	cause_import_ai	cause_import_mental_health	cause_import_poverty	cause_import_rationality	cause_import_meta	cause_import_xrisk_other	cause_import_other	extra_extra_cause
 
-#Top cause: totals (bar)
-counts <- table(topcause)
-barplot(counts, main="Top Cause Area",
-        xlab="Cause Area",ylab = "Frequency")
-
-table2 <- table(topcause)
+#Top cause: totals (bar): FIX LABELS
+table(top_case)
+table2 <- table(top_case)
 prop.table(table2)
-barplot(prop.table(table2), main="Top Cause Area",
-        xlab="Cause Area",ylab = "Proportion")
+EAS2<- na.omit(subset(EAS, select = c(top_case)))
+print(levels(EAS2$top_case))
+EAS2$top_case = factor(EAS2$top_case,levels(EAS2$top_case)[c(3,2,4,1,5)])
+ggplot(EAS2, aes(x = top_case, fill=top_case)) +
+  geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
+  scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Top Cause if forced to choose only one", y = "Percent", x = "")+ theme(legend.position = "none")
 
 #Top cause: totals (comparison to 2018: bar) 
 #Top cause: totals (broader longditudinal optional)
 
-#Cause selection: full scale: (likert graph) (table) (“near top” table)
+#Cause selection: full scale: (likert graph) (table) (“near top” table): FIX LABELS
+EAS2<- na.omit(subset(EAS, select = c(cause_import_animal_welfare,	cause_import_cause_prioritization,	cause_import_biosecurity,	cause_import_climate_change,	cause_import_nuclear_security,	cause_import_ai,	cause_import_mental_health,	cause_import_poverty,	cause_import_rationality,	cause_import_meta,	cause_import_xrisk_other,	cause_import_other)))
 library(likert)
-likert(dat)
-summary(dat)
-Result = likert(dat)
+likert(EAS2)
+summary(EAS2)
+Result = likert(EAS2)
 title <- "Cause Selections"
 plot(Result,
      type="bar") +ggtitle(title)
 
 #Mean score: table, bar?
+
 #Recode variable to numeric
+#NEED TO CREATE NUMERIC
 EAS$povnum <- as.numeric(povscale)
 EAS$ainum <- as.numeric(aiscale)
 attach(EAS)
@@ -500,22 +473,29 @@ EAS2<- na.omit(subset(EAS, select = c(povnum, ainum))
                       "AI Risk" =
                         list(
                           "mean (sd)" = ~ qwraps2::mean(EAS2$ainum))))
-### Overall
+### Overall?
 whole <- summary_table(EAS2, our_summary1)
 whole
 
+#table(mean)
+#Mean score: longditudinal (line)
 
 
-table(mean)
-Mean score: longditudinal (line)
+#Descriptives: top cause (mean?): Forum, LW, other membership groups? (bar)
+table(top_case,member_ea_fb)
+table(top_case,member_ea_forum)	
+table(top_case,member_lw	)
+table(top_case,member_local_group)	
+table(top_case,member_none_of_the_above)	
+table(top_case,member_other)	
+table(top_case,member_gwwc)
 
-Descriptives: top cause (mean?): Forum, LW, other membership groups? (bar)
-Descriptives: top cause (mean?): gender, gender gap (bar)
-Descriptives: top cause (mean?): diet proportion of supporters with diet (bar) proportion of diet supporting cause (bar)
+#Descriptives: top cause (mean?): gender, gender gap (bar)
+#Descriptives: top cause (mean?): diet proportion of supporters with diet (bar) proportion of diet supporting cause (bar)
 
-Logistic regression (top cause): link off to table (AMEs)
-Ordinal regression: link off to table, (ordinal regression graphs)
-MCA: MCA plots
+#Logistic regression (top cause): link off to table (AMEs)
+#Ordinal regression: link off to table, (ordinal regression graphs)
+#MCA: MCA plots
 
 #### Geography ####
 
