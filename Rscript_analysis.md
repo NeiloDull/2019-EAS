@@ -106,7 +106,7 @@ library(readstata13)
 
 #Read in github or CSv data
 #EAS<-read.csv("https://raw.githubusercontent.com/peterhurford/ea-data/master/data/2018/2018-ea-survey-anon-currencied-processed.csv",  stringsAsFactors=FALSE)
-EAS<-read.csv("~/Downloads/2019-ea-survey-anon-currencied-processed.csv")
+EAS<-read.csv("~/Downloads/2019-ea-survey-anon-currencied-processed-draft6.csv")
 ##OR preprocessed data
 #library(readstata13)
 #EAS <- read.dta13("~/Downloads/EAsurvey2019_cleaned.dta")
@@ -119,20 +119,29 @@ summary(EAS)
 #Total sample size
 ##Age: distribution (histogram), median, mean
 
-#continous age
+#continous age (only in non-anonymised dataset)
 #EAS$age <- as.numeric(EAS$age)
 #gghistogram(EAS, x = "age", bins = 50, 
             #add = "mean",main = "Distribution of Age")
 attach(EAS)
-
+print(levels(age))
 table(age)
 table2 <- table(age)
 prop.table(table2)
 EAS$agenum <- as.numeric(EAS$age)
-attach(EAS)
 mean(agenum, na.rm= T)
 median(agenum, na.rm= T)
+print(levels(age))
+EAS2<- na.omit(subset(EAS, select = c(age)))
+ggplot(EAS2, aes(x = age, fill=age)) +
+  geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
+  scale_y_continuous(labels = percent) + theme_tufte() +
+  labs(title = "Distribution of Age", y = "Percent", x = "")+ theme(legend.position = "none")
+
+
 ##Gender: descriptives
+
 table(gender_b)
 table2 <- table(gender_b)
 prop.table(table2)
@@ -144,7 +153,17 @@ ggplot(EAS2, aes(x = gender_ordered, fill=gender_ordered)) +
   scale_y_continuous(labels = percent) + theme_tufte() +
   labs(title = "Distribution of Gender", y = "Percent", x = "")+ theme(legend.position = "none")
 #Drop "other"
-
+EAS2$gender_mf[EAS2$gender_ordered== "Male"] <- "Male"
+EAS2$gender_mf[EAS2$gender_ordered== "Female"] <- "Female"
+EAS2$gender_mf <-as.factor(EAS2$gender_mf)
+levels(EAS2$gender_mf)
+EAS3<- na.omit(subset(EAS2, select = c(gender_mf)))
+EAS3$gender_mf = factor(EAS3$gender_mf,levels(EAS3$gender_mf)[c(2,1)])
+ggplot(EAS3, aes(x = gender_mf, fill=gender_mf)) +
+  geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
+  scale_y_continuous(labels = percent) + theme_tufte() +
+  labs(title = "Distribution of Gender", y = "Percent", x = "")+ theme(legend.position = "none")
 
 #Gender: comparison to 2018
 #2018-  Male (1,592, 69.82% ) Female (688, 30.18%)
@@ -224,6 +243,8 @@ barplot(prop.table(discipline), main="College Distribution",
 #Education: university of undergraduate, descriptives [if included]
 table(university)
 #Careers: employment status- descriptives (bar)
+employed_full_time employed_part_time employed_self employed_looking employed_not_looking employed_homemaker employed_retired employed_student_part employed_student_full
+
 table(job)
 barplot(table(job), main="Employment Status Distribution",
         xlab="Employment Status",ylab = "Frequency")
@@ -231,6 +252,7 @@ table2 <- table(job)
 barplot(prop.table(job), main="Employment Status Distribution",
         xlab="Employment Status",ylab = "Proportion")
 #Careers: field of employment- descriptives (bar)
+
 table(field)
 barplot(table(field), main="Field of employment Distribution",
         xlab="Field of employment ",ylab = "Frequency")
