@@ -212,35 +212,27 @@ ggplot(EAS3, aes(x = educ, fill=educ)) +
 #Education: disciplines (bar)
 logical_vars <- lapply(EAS, class) == "logical"
 EAS[, logical_vars] <- lapply(EAS[, logical_vars], as.factor)
-
+#
 table(EAS$studied_econ)
-table2 <- table(EAS$studied_econ)
-prop.table(table2)
-counts <- table(EAS$studied_econ)
+table(EAS$studied_engineering)
+table(EAS$studied_math)
+table(EAS$studied_medicine)
+table(EAS$studied_psych)
+table(EAS$studied_phil)
+table(EAS$studied_physics)
+table(EAS$studied_humanities)
+table(EAS$studied_social_science)
+table(EAS$studied_other_science)
+table(EAS$studied_vocational)
 
-discipline <- table(EAS$studied_cs,EAS$studied_econ,
-EAS$studied_engineering ,
-EAS$studied_math ,
-EAS$studied_medicine, 
-EAS$studied_psych ,
-EAS$studied_phil, 
-EAS$studied_physics ,
-EAS$studied_humanities ,
-EAS$studied_social_science ,
-EAS$studied_other_science ,
-EAS$studied_vocational)
-discipline
-#create single discipline variable
-
-print(levels(dat$welcome))
-table(discipline)
+# single discipline variable?
 
 barplot(table(discipline), main="Discipline Distribution",
         xlab="Discipline",ylab = "Frequency")
 table2 <- table(discipline)
 barplot(prop.table(discipline), main="College Distribution",
         xlab="Discipline",ylab = "Proportion")
-#Education: comparisons to 2018
+
 #Education: university of undergraduate, descriptives [if included]
 table(university)
 #Careers: employment status- descriptives (bar)
@@ -295,24 +287,26 @@ table(normative)
 #Morality: metaethics: descriptives
 table(metaethics)
 ##### Where First Heard and Get Involved######################
-
+table(first_heard_EA)
+table2 <- table(first_heard_EA)
+prop.table(table2)
 #Where first heard: descriptives: (bar chart)
+##HOW TO FIX X-axis??? & Order by percent
+EAS2<- na.omit(subset(EAS, select = c(first_heard_EA)))
+ggplot(EAS2, aes(x = first_heard_EA, fill=first_heard_EA)) +
+  geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
+  scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Where first heard of EA", y = "Percent", x = "")+ theme(legend.position = "none")
+
 #Where first heard: comparison to last year
-
-#Where first heard: Other open comment breakdown
-#Where first heard: Other open comment: (bar chart)
-
-#Where first heard: year by year breakdown (Area Chart?)
-
-
-EAS2<- na.omit(subset(EAS, select = c(eayear, firstheard)))
-table(firstheard, eayear1)
-heardyear <- table(firstheard, eayear1)
-prop.table(heardyear,2) 
-
+https://forum.effectivealtruism.org/posts/S4WmbHJr32WcmwFD7/ea-survey-series-2018-where-people-first-hear-about-ea-and
+#Excel/G-Sheet:Where first heard: Other open comment breakdown 
+#Excel/G-Sheet:Where first heard: Other open comment: (bar chart)
+#Excel/G-Sheet:Where first heard: year by year breakdown (Area Chart?)
 #Comparison of year by year (2019) to year by year (2018) 
 #(Area chart), (line chart) etc (absolute and proportions)
-#frequency
+#fExcel/G-Sheet:requency
 h<- barplot(table(eayear1), main="EAs first hearing of EA/ Total Eas",
             xlab="Year",ylab = "Frequnecy")
 
