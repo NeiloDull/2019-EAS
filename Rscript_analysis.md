@@ -136,12 +136,10 @@ EAS2<- na.omit(subset(EAS, select = c(age)))
 ggplot(EAS2, aes(x = age, fill=age)) +
   geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
   geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
-  scale_y_continuous(labels = percent) + theme_tufte() +
   labs(title = "Distribution of Age", y = "Percent", x = "")+ theme(legend.position = "none")
 
 
-##Gender: descriptives
-
+##Gender: descriptives (Male, Female, Other)
 table(gender_b)
 table2 <- table(gender_b)
 prop.table(table2)
@@ -150,7 +148,7 @@ EAS2$gender_ordered = factor(EAS2$gender_b,levels(EAS2$gender_b)[c(2,1,3)])
 ggplot(EAS2, aes(x = gender_ordered, fill=gender_ordered)) +
   geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
   geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
-  scale_y_continuous(labels = percent) + theme_tufte() +
+  scale_y_continuous(labels = percent) + theme_classic() +
   labs(title = "Distribution of Gender", y = "Percent", x = "")+ theme(legend.position = "none")
 #Drop "other"
 EAS2$gender_mf[EAS2$gender_ordered== "Male"] <- "Male"
@@ -159,21 +157,24 @@ EAS2$gender_mf <-as.factor(EAS2$gender_mf)
 levels(EAS2$gender_mf)
 EAS3<- na.omit(subset(EAS2, select = c(gender_mf)))
 EAS3$gender_mf = factor(EAS3$gender_mf,levels(EAS3$gender_mf)[c(2,1)])
+table(EAS3$gender_mf)
+table2 <- table(EAS3$gender_mf)
+prop.table(table2)
+#Gender: comparison to 2018
+#2018-  Male (1,592, 69.82% ) Female (688, 30.18%)
+#Graph
 ggplot(EAS3, aes(x = gender_mf, fill=gender_mf)) +
   geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
   geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
-  scale_y_continuous(labels = percent) + theme_tufte() +
+  scale_y_continuous(labels = percent) + theme_classic() +
   labs(title = "Distribution of Gender", y = "Percent", x = "")+ theme(legend.position = "none")
 
-#Gender: comparison to 2018
-#2018-  Male (1,592, 69.82% ) Female (688, 30.18%)
+
 ##Education: level (bar)
 table(education)
 table2 <- table(education)
 prop.table(table2)
 counts <- table(education)
-barplot(prop.table(table2), main="Education Distribution",
-        xlab="Level of Education",ylab = "Proportion")
 #proportions
 dev.off()
 EAS2<- na.omit(subset(EAS, select = c(education)))
@@ -182,16 +183,16 @@ EAS2$education_ordered = factor(EAS2$education,levels(EAS2$education)[c(8,4,7,1,
 ggplot(EAS2, aes(x = education_ordered, fill=education_ordered)) +
   geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
   geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
-  scale_y_continuous(labels = percent) + theme_tufte() +
+  scale_y_continuous(labels = percent) + theme_classic() +
   labs(title = "Distribution of Education", y = "Percent", x = "Type of Education")+ theme(legend.position = "none")
 ##Group education levels
 
 EAS2$educ <- EAS2$education
-levels(EAS2$educ) <- list(No_Degree=c("Some high school","High school graduate","Some college, no degree"),
+levels(EAS2$educ) <- list(Non_college=c("Some high school","High school graduate"),
 Bachelors= c("Bachelor's degree"),
 Masters=c("Master's degree"),
 PhD=c("Doctoral degree"),
-Other_degree=c("Associate's degree","Professional degree"))
+Other_college=c("Associate's degree","Professional degree","Some college, no degree"))
 print(levels(EAS2$educ))
 #get stats
 table(EAS2$educ)
@@ -205,7 +206,7 @@ EAS3<- na.omit(subset(EAS2, select = c(educ)))
 ggplot(EAS3, aes(x = educ, fill=educ)) +
   geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
   geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
-  scale_y_continuous(labels = percent) + theme_tufte() +
+  scale_y_continuous(labels = percent) + theme_classic() +
   labs(title = "Distribution of Education", y = "Percent", x = "Type of Education")+ theme(legend.position = "none")
 #Education: comparisons to 2018 42.6% BA, 30.4% MA, 14.4% PhD, 12% other college, 0.7% Non-College
 #Education: disciplines (bar)
@@ -320,7 +321,7 @@ EAS2<- na.omit(subset(EAS, select = c(eayear1)))
 ggplot(EAS2, aes(x = as.factor(eayear1),)) +
   geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
   geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
-  scale_y_continuous(labels = percent) + theme_tufte() +
+  scale_y_continuous(labels = percent) + theme_classic() +
   labs(title = "Distribution of Gender", y = "Percent", x = "")+ theme(legend.position = "none")
 
 #cumulative (denisty)
@@ -393,8 +394,8 @@ barplot(tapply(EAS2$donate_2017_c_n, format(EAS2$eayear), FUN=sum))
 #Individual donation size: distribution chart, 
 title <- "2018 Individual donation size: distribution chart"
 sp<-ggplot(EAS, aes(donate_2017_log)) + geom_density(alpha = 0.2)+ xlab("2018 Donations (log) ") +labs(fill="") + ggtitle(title)
-sp + theme_tufte()
-sp + theme_tufte() + theme( legend.position=c(0.2, 0.9)) 
+sp + theme_classic()
+sp + theme_classic() + theme( legend.position=c(0.2, 0.9)) 
 
 #log histogram
 p <- ggplot(EAS, aes(x=donate_2017_c_n)) +
@@ -402,7 +403,7 @@ p <- ggplot(EAS, aes(x=donate_2017_c_n)) +
   geom_vline(aes(xintercept=mean(donate_2017_c_n)), color="blue",
              linetype="dashed")+
   labs(title="Histogram of 2018 Donations",x="2018 Donations", y = "Count")+
-  theme_tufte()
+  theme_classic()
 require(scales)
 p + scale_x_continuous( trans = log10_trans(),
                         breaks = trans_breaks("log10", function(x) 10^x),
@@ -543,7 +544,7 @@ EAS2<- na.omit(subset(EAS, select = c(geog)))
 ggplot(EAS2, aes(x = as.factor(geog), fill=geog)) +
   geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
   geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
-  scale_y_continuous(labels = percent) + theme_tufte() +
+  scale_y_continuous(labels = percent) + theme_classic() +
   labs(title = "Distribution of Education", y = "Percent", x = "Type of Education")+ theme(legend.position = "none")
 
 #Country: Proportion/Density: (table) (bar chart) (map)
