@@ -427,7 +427,9 @@ Other influences on giving: year first heard EA descriptives (table) (line chart
 #### Cause Selection ####
 
 #Top cause: totals (bar): ??FIX LABELS??
-table(top_case)
+levels(EAS$top_case)[levels(EAS$top_case)=="Long Term Future / Catastrophic and Existential Risk Reduction"]<-"Long Term Future"
+attach(EAS)
+table(EAS$top_case)
 table2 <- table(top_case)
 prop.table(table2)
 EAS2<- na.omit(subset(EAS, select = c(top_case)))
