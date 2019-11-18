@@ -232,11 +232,10 @@ table(EAS$studied_vocational)
 
 #? how to plot the "TRUE' of each altogether?
 
-
 #Education: university of undergraduate, descriptives [if included]
 table(university)
 #Careers: employment status- descriptives (bar)
-employed_full_time employed_part_time employed_self employed_looking employed_not_looking employed_homemaker employed_retired employed_student_part employed_student_full
+#employed_full_time employed_part_time employed_self employed_looking employed_not_looking employed_homemaker employed_retired employed_student_part employed_student_full
 
 table(job)
 barplot(table(job), main="Employment Status Distribution",
