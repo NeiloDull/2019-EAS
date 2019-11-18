@@ -446,6 +446,29 @@ ggplot(EAS2, aes(x = top_case, fill=top_case)) +
 #Cause selection: full scale: (likert graph) (table) (“near top” table): : ??FIX LABELS??
 
 EAS2<- na.omit(subset(EAS, select = c(cause_import_animal_welfare,	cause_import_cause_prioritization,	cause_import_biosecurity,	cause_import_climate_change,	cause_import_nuclear_security,	cause_import_ai,	cause_import_mental_health,	cause_import_poverty,	cause_import_rationality,	cause_import_meta,	cause_import_xrisk_other,	cause_import_other)))
+
+EAS2[] <- lapply(EAS2, factor, 
+               levels=c("I do not think any resources should be devoted to this cause",
+                        "I do not think this is a priority, but should receive some resources",
+                        "Not considered / Not sure",
+                        "This cause deserves significant resources, but less than the top priorities",
+                        "This cause should be a near-top priority",
+                        "This cause should be the top priority (Please choose one)"), 
+               labels = c("No Resources", "Some Resources","Not Sure",  "Significant Resources", "Near-Top Priority", "Top Priority"))
+str(EAS2)
+
+names(EAS2) = c(cause_import_animal_welfare = "Animal welfare",	
+                cause_import_cause_prioritization= "Cause prioritization",	
+                cause_import_biosecurity= "Biosecurity",	
+                cause_import_climate_change= "Climate change",
+                cause_import_nuclear_security ="Nuclear security",
+                cause_import_ai ="AI risk",
+                cause_import_mental_health ="Mental health",
+                cause_import_poverty ="Global poverty",	
+                cause_import_rationality ="Improving rationality",
+                cause_import_meta ="Meta charities",	
+                cause_import_xrisk_other ="Other x-risk",
+                cause_import_other ="Other")
 library(likert)
 likert(EAS2)
 summary(EAS2)
