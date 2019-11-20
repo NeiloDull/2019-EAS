@@ -124,6 +124,36 @@ EASinternal<-read.csv("~/Downloads/2019-ea-survey-INTERNAL-draft7.csv")
 EASinternal$age1 <- as.numeric(EAS$age1)
 gghistogram(EASinternal, x = "age1", bins = 50, 
             add = "mean",add.params = list(linetype = "dashed", color="red",label = "mean"),main = "Distribution of Age")+ scale_x_continuous(breaks=seq(13,100,5))+ xlab("Age of respondent") + ylab("Number of respondents")  
+mean(EASinternal$age1, na.rm= T)
+median(EASinternal$age1, na.rm= T)
+##2015-2019 Age distribution
+dat <- read.dta13("~/Downloads/EASage.dta")
+attach(dat)
+dat$age<-as.numeric(dat$age)
+dat$survey<-as.factor(dat$survey)
+dat1<- na.omit(subset(dat, select = c(age, survey)))
+library(ggplot2)
+library(ggridges)
+#RIDGE PLOT
+title <- "Distribution of age in EA Surveys 2015-2019 "
+library(ggthemes) # Load
+mv<- ggplot(dat1, aes(x = age, y =survey, fill=survey)) + geom_density_ridges()+ xlab("age") 
+mv+ ggtitle(title) + theme_tufte() + theme(legend.position = "none") + scale_x_continuous(breaks=seq(13,83,5), limits=c(13, 83))+ xlab("Age of respondent") + ylab("Survey Year")
+#Overlapping Density
+library(ggplot2)
+title <- "Distribution of age in EA Surveys 2015-2019 "
+sp<-ggplot(dat1, aes(age, fill = survey)) + geom_density(alpha = 0.4)+ xlab("Age of respondent ") +labs(fill="") + ggtitle(title)
+sp + theme_tufte()
+sp + theme_tufte() + theme( legend.position=c(0.9, 0.9)) + scale_x_continuous(breaks=seq(13,100,5), limits=c(13, 100))
+##OVERLAPPING HIST
+library(ggplot2)
+x<-ggplot(dat1, aes(age, fill = survey)) + 
+  geom_histogram(alpha = 0.5, aes(y = ..count..), position = 'identity')+ xlab("Age of respondent")+ ylab("Number of respondents") +labs(fill="") + ggtitle(title)
+x +geom_text(aes(x=27, label="Median Ages", y=-10), colour="blue", text=element_text(size=11))+  geom_vline(xintercept = c(a <- c(26,  28,  29)), linetype = "dashed", colour = c("orange","turquoise","purple"))  + theme_tufte() + theme( legend.position=c(0.9, 0.9)) + scale_x_continuous(breaks=seq(13,85,5), limits=c(13, 85))
+
+
+
+
 #Get agegroup stats instead
 print(levels(age))
 table(age)
@@ -427,6 +457,7 @@ Other influences on giving: year first heard EA descriptives (table) (line chart
 #### Cause Selection ####
 
 #Top cause: totals (bar): ??FIX LABELS??
+
 levels(EAS$top_case)[levels(EAS$top_case)=="Long Term Future / Catastrophic and Existential Risk Reduction"]<-"Long Term Future"
 attach(EAS)
 table(EAS$top_case)
