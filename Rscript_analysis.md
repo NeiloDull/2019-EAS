@@ -1,8 +1,9 @@
 # EA SURVEY 2019 ANALYSIS 
 #Set working dirctory to whereever you have stored EAS data
 setwd("~/Downloads")
+#Clear R
 rm(list=ls())
-#### PACKAGES & Load Data#######
+#### Packages: Install and load#######
 require(foreign)
 install.packages(c("clusterSEs", "corrplot", "descr", "DT", "Matching", "pander", "pastecs", "plotly", "stargazer", "survey", "WeightIt", "Zelig"))
 install.packages('ggplot2', dep = TRUE) 
@@ -13,13 +14,13 @@ devtools:::install_github("ngreifer/cobalt")
 install.packages("readstata13")
 install.packages("nnet")
 install.packages("Ecdat")
-install.packages("ggthemes") # Install 
+install.packages("ggthemes")  
 install.packages("qwraps2")
-install.packages("magrittr") # package installations are only needed the first time you use it
+install.packages("magrittr")
 install.packages("dplyr")    # alternative installation of the %>%
 install.packages("pastecs")
 install.packages("gmodels")
-install.packages("ggthemes") # Install 
+install.packages("ggthemes")
 install.packages("tidyverse")
 install.packages("leaps")
 install.packages("caret")
@@ -31,11 +32,11 @@ library("PerformanceAnalytics")
 library(tidyverse)
 library(caret)
 library(leaps)
-library(ggthemes) # Load
+library(ggthemes) 
 library(gmodels)
 library(pastecs)
-library(magrittr) # needs to be run every time you start R and want to use %>%
-library(dplyr)    # alternatively, this also loads %>%
+library(magrittr) 
+library(dplyr)    # this also loads %>%
 library(ordinal)
 require(ggplot2)
 require(MASS)
@@ -86,7 +87,7 @@ library(margins)
 library(Ecdat)
 library(ggridges)
 library(tidyverse)
-library(ggthemes) # Load
+library(ggthemes) 
 require(nnet)
 library(nnet)
 library(ggpubr)
@@ -105,6 +106,7 @@ library(readstata13)
 
 #### LOAD DATA ####
 
+#Load public data
 #Read in github or CSv data
 #EAS<-read.csv("https://raw.githubusercontent.com/peterhurford/ea-data/master/data/2018/2018-ea-survey-anon-currencied-processed.csv",  stringsAsFactors=FALSE)
 EAS<-read.csv("~/Downloads/2019-ea-survey-PUBLIC-draft7.csv")
@@ -112,6 +114,7 @@ EAS<-read.csv("~/Downloads/2019-ea-survey-PUBLIC-draft7.csv")
 #library(readstata13)
 #EAS <- read.dta13("~/Downloads/EAsurvey2019_cleaned.dta")
 
+#Attach main data
 attach(EAS)
 summary(EAS)
 
@@ -119,14 +122,14 @@ summary(EAS)
 
 #Total sample size: Given 2153
 ##Age: distribution (histogram), median, mean
-#? continous age need  non-anonymised dataset)
+#Load internal dataset to get continous age variable
 EASinternal<-read.csv("~/Downloads/2019-ea-survey-INTERNAL-draft7.csv")
 EASinternal$age1 <- as.numeric(EAS$age1)
 gghistogram(EASinternal, x = "age1", bins = 50, 
             add = "mean",add.params = list(linetype = "dashed", color="red",label = "mean"),main = "Distribution of Age")+ scale_x_continuous(breaks=seq(13,100,5))+ xlab("Age of respondent") + ylab("Number of respondents")  
 mean(EASinternal$age1, na.rm= T)
 median(EASinternal$age1, na.rm= T)
-#Get agegroup stats instead
+#Get agegroup stats from Public dataset
 print(levels(age))
 table(age)
 table2 <- table(age)
@@ -143,9 +146,13 @@ ggplot(EAS2, aes(x = age, fill=age)) +
   geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
   labs(title = "Distribution of Age", y = "Percent", x = "")+ theme(legend.position = "none")
 
-EAS<-read.csv("~/Downloads/2019-ea-survey-INTERNAL-draft7.csv")
-attach(EAS)
+
+
 ##Gender: descriptives (Male, Female, Other)
+#if for some reason you need to load internal dataset as main data instead
+#EAS<-read.csv("~/Downloads/2019-ea-survey-INTERNAL-draft7.csv")
+#attach(EAS)
+
 #get gender stats
 table(gender_b)
 table2 <- table(gender_b)
@@ -169,8 +176,7 @@ EAS3$gender_mf = factor(EAS3$gender_mf,levels(EAS3$gender_mf)[c(2,1)])
 table(EAS3$gender_mf)
 table2 <- table(EAS3$gender_mf)
 prop.table(table2)
-#Gender: comparison to 2018
-#2018-  Male (1,592, 69.82% ) Female (688, 30.18%)
+#Gender: comparison to 2018: Male (1,592, 69.82% ) Female (688, 30.18%)
 #Plot gender distribution
 ggplot(EAS3, aes(x = gender_mf, fill=gender_mf)) +
   geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
@@ -217,6 +223,8 @@ ggplot(EAS3, aes(x = educ, fill=educ)) +
 #Education: comparisons to 2018 42.6% BA, 30.4% MA, 14.4% PhD, 12% other college, 0.7% Non-College
 
 #Education: disciplines (bar)
+#? how to plot the "TRUE' of each altogether?
+
 #All disciplines are in logic class, convert to factor?
 logical_vars <- lapply(EAS, class) == "logical"
 EAS[, logical_vars] <- lapply(EAS[, logical_vars], as.factor)
@@ -233,9 +241,10 @@ table(EAS$studied_social_science)
 table(EAS$studied_other_science)
 table(EAS$studied_vocational)
 
-#? how to plot the "TRUE' of each altogether?
+
 
 #Education: university of undergraduate, descriptives [if included]
+#? not included in datasets
 table(university)
 #Careers: employment status- descriptives (bar)
 #employed_full_time employed_part_time employed_self employed_looking employed_not_looking employed_homemaker employed_retired employed_student_part employed_student_full
@@ -246,6 +255,9 @@ barplot(table(job), main="Employment Status Distribution",
 table2 <- table(job)
 barplot(prop.table(job), main="Employment Status Distribution",
         xlab="Employment Status",ylab = "Proportion")
+
+##UNFINISHED Graphics: Have added descriptives to shared G-Sheet
+
 #Careers: field of employment- descriptives (bar)
 
 table(field)
@@ -289,11 +301,12 @@ table(normative)
 #Morality: metaethics: descriptives
 table(metaethics)
 ##### Where First Heard and Get Involved######################
+#get stats
 table(first_heard_EA)
 table2 <- table(first_heard_EA)
 prop.table(table2)
 #Where first heard: descriptives: (bar chart)
-##Unsure how to re-order "(..count..)/sum(..count..)"
+#? Unsure how to re-order "(..count..)/sum(..count..)"
 EAS2<- na.omit(subset(EAS, select = c(first_heard_EA)))
 p<-ggplot(EAS2, aes(x = first_heard_EA, fill=first_heard_EA)) +
   geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
@@ -313,12 +326,12 @@ p+geom_bar(stat="identity")+  #
 
 #Where first heard: comparison to last year
 https://forum.effectivealtruism.org/posts/S4WmbHJr32WcmwFD7/ea-survey-series-2018-where-people-first-hear-about-ea-and
-#Excel/G-Sheet:Where first heard: Other open comment breakdown 
-#Excel/G-Sheet:Where first heard: Other open comment: (bar chart)
-#Excel/G-Sheet:Where first heard: year by year breakdown (Area Chart?)
-#Comparison of year by year (2019) to year by year (2018) 
-#(Area chart), (line chart) etc (absolute and proportions)
-#Excel/G-Sheet:Frequency per first year
+#? Excel/G-Sheet:Where first heard: Other open comment breakdown 
+#? Excel/G-Sheet:Where first heard: Other open comment: (bar chart)
+#? Excel/G-Sheet:Where first heard: year by year breakdown (Area Chart?)
+#? Comparison of year by year (2019) to year by year (2018) 
+#? (Area chart), (line chart) etc (absolute and proportions)
+#? Excel/G-Sheet:Frequency per first year
 
 #Getting involved: descriptives: (bar chart)
 table(EAS$involved_tlycs)	
@@ -338,7 +351,7 @@ table(EAS$involved_podcast)
 table(EAS$involved_swiss)	
 table(EAS$involved_none_of_the_above)	
 table(EAS$involved_other)
-##Unsure how to group the involved_ variables & re-order "(..count..)/sum(..count..)"
+#? Unsure how to group the involved_ variables & re-order "(..count..)/sum(..count..)"
 EAS2<- na.omit(subset(EAS, select = c(?)))
 p<-ggplot(EAS2, aes(x = ?, fill=?)) +
   geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
@@ -355,16 +368,14 @@ p+geom_bar(stat="identity")+  #
   aes(x=reorder(dat$involved,percent,sum),y=percent,label=percent,fill=dat$involved)+geom_text(aes(label=scales::percent(percent), vjust=5))+scale_y_continuous(labels = percent) + theme_classic() +
   labs(title = "Which factors were important in 'getting you into' effective altruism? ", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
 
-
-
 #Getting involved: comparison to last year
 https://forum.effectivealtruism.org/posts/uPFx462NAamBo5Eqq/ea-survey-series-2018-how-do-people-get-involved-in-ea
-#Getting involved:  year by year breakdown
-#Comparison of 2019’s 2018 yby breakdown to 2018
+#? Getting involved:  year by year breakdown
+#? Comparison of 2019’s 2018 yby breakdown to 2018
 
 
 
-#### Donations: Use Kim's Script! ####
+#### Donations: Use Kim's Script! The script below needs updating ####
 EAS2<- na.omit(subset(EAS, select = c(donate_2017_c_n, eayear)))
 #look for outliers
 outinc=max(EAnew$income_2018_individual_c,na.rm=TRUE)
@@ -460,13 +471,17 @@ Other influences on giving: year first heard EA descriptives (table) (line chart
 
 #Top cause: totals (bar): ??FIX LABELS??
 
+#Rename LTF for better visualization
 levels(EAS$top_case)[levels(EAS$top_case)=="Long Term Future / Catastrophic and Existential Risk Reduction"]<-"Long Term Future"
+#attach new label
 attach(EAS)
+#stats
 table(EAS$top_case)
 table2 <- table(top_case)
 prop.table(table2)
 EAS2<- na.omit(subset(EAS, select = c(top_case)))
 print(levels(EAS2$top_case))
+#plot
 EAS2$top_case = factor(EAS2$top_case,levels(EAS2$top_case)[c(3,2,4,1,5)])
 ggplot(EAS2, aes(x = top_case, fill=top_case)) +
   geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
@@ -479,9 +494,8 @@ ggplot(EAS2, aes(x = top_case, fill=top_case)) +
 #Top cause: totals (broader longditudinal optional)
 #NEED 2018 DATA
 #Cause selection: full scale: (likert graph) (table) (“near top” table): : ??FIX LABELS??
-
 EAS2<- na.omit(subset(EAS, select = c(cause_import_animal_welfare,	cause_import_cause_prioritization,	cause_import_biosecurity,	cause_import_climate_change,	cause_import_nuclear_security,	cause_import_ai,	cause_import_mental_health,	cause_import_poverty,	cause_import_rationality,	cause_import_meta,	cause_import_xrisk_other,	cause_import_other)))
-
+##Fix labels
 EAS2[] <- lapply(EAS2, factor, 
                levels=c("I do not think any resources should be devoted to this cause",
                         "I do not think this is a priority, but should receive some resources",
@@ -504,6 +518,7 @@ names(EAS2) = c(cause_import_animal_welfare = "Animal welfare",
                 cause_import_meta ="Meta charities",	
                 cause_import_xrisk_other ="Other x-risk",
                 cause_import_other ="Other")
+#Plot Likert
 library(likert)
 likert(EAS2)
 summary(EAS2)
@@ -530,6 +545,7 @@ table(top_case,member_local_group)
 table(top_case,member_none_of_the_above)	
 table(top_case,member_other)	
 table(top_case,member_gwwc)
+#? How to create bar for all the above?
 
 #Descriptives: top cause (mean?): gender, gender gap (bar)
 #EAS<- na.omit(subset(EAS2, select = c(gender_mf)))
@@ -544,15 +560,13 @@ EAS2<- na.omit(subset(EAS, select = c(gender_mf, cause_import_animal_welfare,	ca
 EAS2 <- data.frame(lapply(EAS2, function(x) as.numeric(as.factor(x))))
 meancause<-colMeans(EAS2[sapply(EAS2, is.numeric)])
 
-
-
+##UNFINISHED
 #Descriptives: top cause (mean?): diet proportion of supporters with diet (bar) proportion of diet supporting cause (bar)
-
 #Logistic regression (top cause): link off to table (AMEs)
 #Ordinal regression: link off to table, (ordinal regression graphs)
 #MCA: MCA plots
 
-#### Geography: INCOMPLETE####
+#### Geography: UNFINISHED####
 
 #Country: frequencies (table) (bar chart) (map)
 EAS$country1 <-as.factor(EAS$country)
