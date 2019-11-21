@@ -126,34 +126,6 @@ gghistogram(EASinternal, x = "age1", bins = 50,
             add = "mean",add.params = list(linetype = "dashed", color="red",label = "mean"),main = "Distribution of Age")+ scale_x_continuous(breaks=seq(13,100,5))+ xlab("Age of respondent") + ylab("Number of respondents")  
 mean(EASinternal$age1, na.rm= T)
 median(EASinternal$age1, na.rm= T)
-##2015-2019 Age distribution
-dat <- read.dta13("~/Downloads/EASage.dta")
-attach(dat)
-dat$age<-as.numeric(dat$age)
-dat$survey<-as.factor(dat$survey)
-dat1<- na.omit(subset(dat, select = c(age, survey)))
-library(ggplot2)
-library(ggridges)
-#RIDGE PLOT
-title <- "Distribution of age in EA Surveys 2015-2019 "
-library(ggthemes) # Load
-mv<- ggplot(dat1, aes(x = age, y =survey, fill=survey)) + geom_density_ridges()+ xlab("age") 
-mv+ ggtitle(title) + theme_tufte() + theme(legend.position = "none") + scale_x_continuous(breaks=seq(13,83,5), limits=c(13, 83))+ xlab("Age of respondent") + ylab("Survey Year")
-#Overlapping Density
-library(ggplot2)
-title <- "Distribution of age in EA Surveys 2015-2019 "
-sp<-ggplot(dat1, aes(age, fill = survey)) + geom_density(alpha = 0.4)+ xlab("Age of respondent ") +labs(fill="") + ggtitle(title)
-sp + theme_tufte()
-sp + theme_tufte() + theme( legend.position=c(0.9, 0.9)) + scale_x_continuous(breaks=seq(13,100,5), limits=c(13, 100))
-##OVERLAPPING HIST
-library(ggplot2)
-x<-ggplot(dat1, aes(age, fill = survey)) + 
-  geom_histogram(alpha = 0.5, aes(y = ..count..), position = 'identity')+ xlab("Age of respondent")+ ylab("Number of respondents") +labs(fill="") + ggtitle(title)
-x +geom_text(aes(x=27, label="Median Ages", y=-10), colour="blue", text=element_text(size=11))+  geom_vline(xintercept = c(a <- c(26,  28,  29)), linetype = "dashed", colour = c("orange","turquoise","purple"))  + theme_tufte() + theme( legend.position=c(0.9, 0.9)) + scale_x_continuous(breaks=seq(13,85,5), limits=c(13, 85))
-
-
-
-
 #Get agegroup stats instead
 print(levels(age))
 table(age)
@@ -171,7 +143,8 @@ ggplot(EAS2, aes(x = age, fill=age)) +
   geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
   labs(title = "Distribution of Age", y = "Percent", x = "")+ theme(legend.position = "none")
 
-
+EAS<-read.csv("~/Downloads/2019-ea-survey-INTERNAL-draft7.csv")
+attach(EAS)
 ##Gender: descriptives (Male, Female, Other)
 #get gender stats
 table(gender_b)
@@ -320,13 +293,23 @@ table(first_heard_EA)
 table2 <- table(first_heard_EA)
 prop.table(table2)
 #Where first heard: descriptives: (bar chart)
-##HOW TO FIX X-axis??? & Order by percent
+##Unsure how to re-order "(..count..)/sum(..count..)"
 EAS2<- na.omit(subset(EAS, select = c(first_heard_EA)))
-ggplot(EAS2, aes(x = first_heard_EA, fill=first_heard_EA)) +
+p<-ggplot(EAS2, aes(x = first_heard_EA, fill=first_heard_EA)) +
   geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
   geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
   scale_y_continuous(labels = percent) + theme_classic() +
   labs(title = "Where first heard of EA", y = "Percent", x = "")+ theme(legend.position = "none")
+p + coord_flip()
+
+##Or load descriptives from table into a separate dataset e.g. Excel or STATA
+dat <- read.dta13("~/Downloads/EAS2019_firstheard.dta")
+dat$firstheardofeafrom <- as.factor(dat$firstheardofeafrom)
+p=ggplot(data=dat)  
+p+geom_bar(stat="identity")+  #
+  aes(x=reorder(dat$firstheardofeafrom,percent,sum),y=percent,label=percent,fill=dat$firstheardofeafrom)+geom_text(aes(label=scales::percent(percent), vjust=5))+scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Where first heard of EA", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
+
 
 #Where first heard: comparison to last year
 https://forum.effectivealtruism.org/posts/S4WmbHJr32WcmwFD7/ea-survey-series-2018-where-people-first-hear-about-ea-and
@@ -355,6 +338,25 @@ table(EAS$involved_podcast)
 table(EAS$involved_swiss)	
 table(EAS$involved_none_of_the_above)	
 table(EAS$involved_other)
+##Unsure how to group the involved_ variables & re-order "(..count..)/sum(..count..)"
+EAS2<- na.omit(subset(EAS, select = c(?)))
+p<-ggplot(EAS2, aes(x = ?, fill=?)) +
+  geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
+  scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Which factors were important in 'getting you into' effective altruism, or altering your actions in its direction? ", y = "Percent", x = "")+ theme(legend.position = "none")
+p + coord_flip()
+
+##Or load descriptives from table into a separate dataset e.g. Excel or STATA
+dat <- read.dta13("~/Downloads/EAS2019_involved.dta")
+dat$involved <- as.factor(dat$involved)
+p=ggplot(data=dat)  
+p+geom_bar(stat="identity")+  #
+  aes(x=reorder(dat$involved,percent,sum),y=percent,label=percent,fill=dat$involved)+geom_text(aes(label=scales::percent(percent), vjust=5))+scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Which factors were important in 'getting you into' effective altruism? ", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
+
+
+
 #Getting involved: comparison to last year
 https://forum.effectivealtruism.org/posts/uPFx462NAamBo5Eqq/ea-survey-series-2018-how-do-people-get-involved-in-ea
 #Getting involved:  year by year breakdown
