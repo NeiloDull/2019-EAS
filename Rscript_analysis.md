@@ -223,7 +223,7 @@ ggplot(EAS3, aes(x = educ, fill=educ)) +
 #Education: comparisons to 2018 42.6% BA, 30.4% MA, 14.4% PhD, 12% other college, 0.7% Non-College
 
 #Education: disciplines (bar)
-#? how to plot the "TRUE' of each altogether?
+#? how to plot the "TRUE' of each "studied_" altogether?
 
 #All disciplines are in logic class, convert to factor?
 logical_vars <- lapply(EAS, class) == "logical"
