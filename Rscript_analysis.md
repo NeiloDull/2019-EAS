@@ -108,8 +108,9 @@ library(readstata13)
 
 #Load public data
 #Read in github or CSv data
-#EAS<-read.csv("https://raw.githubusercontent.com/peterhurford/ea-data/master/data/2018/2018-ea-survey-anon-currencied-processed.csv",  stringsAsFactors=FALSE)
+EAS<-read.csv("https://raw.githubusercontent.com/peterhurford/ea-data/2019/data/2019/2019-ea-survey-PUBLIC-draft7.csv",  stringsAsFactors=FALSE)
 EAS<-read.csv("~/Downloads/2019-ea-survey-PUBLIC-draft7.csv")
+EAS<-read.csv("~/Downloads/2019-ea-survey-INTERNAL-draft7.csv")
 ##OR pre-processed data from STATA or elsewgere e.g.
 #library(readstata13)
 #EAS <- read.dta13("~/Downloads/EAsurvey2019_cleaned.dta")
@@ -144,7 +145,7 @@ EAS2<- na.omit(subset(EAS, select = c(age)))
 ggplot(EAS2, aes(x = age, fill=age)) +
   geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
   geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
-  labs(title = "Distribution of Age", y = "Percent", x = "")+ theme(legend.position = "none")
+  labs(title = "Distribution of Age", y = "Percent", x = "")+ theme(legend.position = "none")+ 
 
 
 
@@ -223,7 +224,12 @@ ggplot(EAS3, aes(x = educ, fill=educ)) +
 #Education: comparisons to 2018 42.6% BA, 30.4% MA, 14.4% PhD, 12% other college, 0.7% Non-College
 
 #Education: disciplines (bar)
-#? how to plot the "TRUE' of each "studied_" altogether?
+#Need to load pre-processed data
+dat <- read.dta13("~/Downloads/EAS_subject.dta")
+p=ggplot(data=dat)  
+p+geom_bar(stat="identity")+  #
+  aes(x=reorder(dat$subjectstudied,percent,sum),y=percent,label=percent,fill=dat$subjectstudied)+geom_text(aes(label=scales::percent(percent), vjust=0))+scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Subjects studied", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
 
 #All disciplines are in logic class, convert to factor?
 logical_vars <- lapply(EAS, class) == "logical"
@@ -247,6 +253,12 @@ table(EAS$studied_vocational)
 #? not included in datasets
 table(university)
 #Careers: employment status- descriptives (bar)
+dat <- read.dta13("~/Downloads/EAS_job.dta")
+p=ggplot(data=dat)  
+p+geom_bar(stat="identity")+  #
+  aes(x=reorder(dat$employmenttype,percent,sum),y=percent,label=percent,fill=dat$employmenttype)+geom_text(aes(label=scales::percent(percent), vjust=0))+scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Career status", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
+
 #employed_full_time employed_part_time employed_self employed_looking employed_not_looking employed_homemaker employed_retired employed_student_part employed_student_full
 
 table(job)
@@ -259,6 +271,18 @@ barplot(prop.table(job), main="Employment Status Distribution",
 ##UNFINISHED Graphics: Have added descriptives to shared G-Sheet
 
 #Careers: field of employment- descriptives (bar)
+dat <- read.dta13("~/Downloads/EAS_experience.dta")
+p=ggplot(data=dat)  
+p+geom_bar(stat="identity")+  #
+  aes(x=reorder(dat$workexperience,percent,sum),y=percent,label=percent,fill=dat$workexperience)+geom_text(aes(label=scales::percent(percent), vjust=0))+scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "3 years work or graduate", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
+
+dat <- read.dta13("~/Downloads/EAS_careerpath.dta")
+p=ggplot(data=dat)  
+p+geom_bar(stat="identity")+  #
+  aes(x=reorder(dat$careerpath,percent,sum),y=percent,label=percent,fill=dat$careerpath)+geom_text(aes(label=scales::percent(percent), vjust=0))+scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Expected career path", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
+
 
 table(field)
 barplot(table(field), main="Field of employment Distribution",
@@ -284,21 +308,64 @@ barplot(prop.table(city), main="Geographic Distribution",
 #Race: descriptives
 table(race)
 #Race: comparison to 2018/2017
+dat <- read.dta13("~/Downloads/EAS_race1.dta")
+p=ggplot(data=dat)  
+p+geom_bar(stat="identity")+  #
+  aes(x=reorder(dat$raceethnicity,percent,sum),y=percent,label=percent,fill=dat$raceethnicity)+geom_text(aes(label=scales::percent(percent), vjust=0))+scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Race/Ethnicity", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
+
 #Religion: descriptives
 table(religion)
 #Religion: comparison to 2018
 #Diet: descriptives
 table(diet)
 #Diet: comparison to 2018
-#Relationship: descriptives
-#Relationship: descriptives
-#Relationship: possible age/country crosstab + proportion test
+
+print(levels(EAS$veg))
+EAS3<- na.omit(subset(EAS, select = c(veg)))
+EAS3$veg_c = factor(EAS3$veg,levels(EAS3$veg)[c(4,3,1,6,5,2)])
+print(levels(EAS3$veg_c))
+p<-ggplot(EAS3, aes(x = veg_c, fill=veg_c)) +
+  geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
+  scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Diet", y = "Percent", x = "Type of Diet")+ theme(legend.position = "none")
+p + coord_flip()
+
+#Education: comparisons to 2018 42.6% BA, 30.4% MA, 14.4% PhD, 12% other college, 0.7% Non-College
+#religion
+dat <- read.dta13("~/Downloads/EAS_religion.dta")
+p=ggplot(data=dat)  
+p+geom_bar(stat="identity")+  #
+  aes(x=reorder(dat$religion,percent,sum),y=percent,label=percent,fill=dat$religion)+geom_text(aes(label=scales::percent(percent), vjust=0))+scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Religious Affiliation", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
+
+
 #Politics: descriptives
+
+dat <- read.dta13("~/Downloads/EAS_politics.dta")
+p=ggplot(data=dat)  
+p+geom_bar(stat="identity")+  #
+  aes(x=reorder(dat$politicalbelief,percent,sum),y=percent,label=percent,fill=dat$politicalbelief)+geom_text(aes(label=scales::percent(percent), vjust=0))+scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Political Beliefs", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
+
 table(politics)
 #Politics: comparison to 2018
 #Morality: normative ethics: descriptives
+dat <- read.dta13("~/Downloads/EAS_morals.dta")
+p=ggplot(data=dat)  
+p+geom_bar(stat="identity")+  #
+  aes(x=reorder(dat$moralview,percent,sum),y=percent,label=percent,fill=dat$moralview)+geom_text(aes(label=scales::percent(percent), vjust=0))+scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Moral View", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
+
 table(normative)
 #Morality: metaethics: descriptives
+dat <- read.dta13("~/Downloads/EAS_ethics.dta")
+p=ggplot(data=dat)  
+p+geom_bar(stat="identity")+  #
+  aes(x=reorder(dat$leantowards,percent,sum),y=percent,label=percent,fill=dat$leantowards)+geom_text(aes(label=scales::percent(percent), vjust=0))+scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Ethical View", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
+
 table(metaethics)
 ##### Where First Heard and Get Involved######################
 #get stats
@@ -320,7 +387,7 @@ dat <- read.dta13("~/Downloads/EAS2019_firstheard.dta")
 dat$firstheardofeafrom <- as.factor(dat$firstheardofeafrom)
 p=ggplot(data=dat)  
 p+geom_bar(stat="identity")+  #
-  aes(x=reorder(dat$firstheardofeafrom,percent,sum),y=percent,label=percent,fill=dat$firstheardofeafrom)+geom_text(aes(label=scales::percent(percent), vjust=5))+scale_y_continuous(labels = percent) + theme_classic() +
+  aes(x=reorder(dat$firstheardofeafrom,percent,sum),y=percent,label=percent,fill=dat$firstheardofeafrom)+geom_text(aes(label=scales::percent(percent), vjust=0))+scale_y_continuous(labels = percent) + theme_classic() +
   labs(title = "Where first heard of EA", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
 
 
@@ -365,7 +432,7 @@ dat <- read.dta13("~/Downloads/EAS2019_involved.dta")
 dat$involved <- as.factor(dat$involved)
 p=ggplot(data=dat)  
 p+geom_bar(stat="identity")+  #
-  aes(x=reorder(dat$involved,percent,sum),y=percent,label=percent,fill=dat$involved)+geom_text(aes(label=scales::percent(percent), vjust=5))+scale_y_continuous(labels = percent) + theme_classic() +
+  aes(x=reorder(dat$involved,percent,sum),y=percent,label=percent,fill=dat$involved)+geom_text(aes(label=scales::percent(percent), vjust=1))+scale_y_continuous(labels = percent) + theme_classic() +
   labs(title = "Which factors were important in 'getting you into' effective altruism? ", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
 
 #Getting involved: comparison to last year
@@ -488,22 +555,111 @@ ggplot(EAS2, aes(x = top_case, fill=top_case)) +
   geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
   scale_y_continuous(labels = percent) + theme_classic() +
   labs(title = "Top Cause if forced to choose only one", y = "Percent", x = "")+ theme(legend.position = "none")
-
 #Top cause: totals (comparison to 2018: bar)
 #NEED 2018 DATA
 #Top cause: totals (broader longditudinal optional)
 #NEED 2018 DATA
 #Cause selection: full scale: (likert graph) (table) (“near top” table): : ??FIX LABELS??
-EAS2<- na.omit(subset(EAS, select = c(cause_import_animal_welfare,	cause_import_cause_prioritization,	cause_import_biosecurity,	cause_import_climate_change,	cause_import_nuclear_security,	cause_import_ai,	cause_import_mental_health,	cause_import_poverty,	cause_import_rationality,	cause_import_meta,	cause_import_xrisk_other,	cause_import_other)))
+#EAS2<- na.omit(subset(EAS, select = c(cause_import_animal_welfare,	cause_import_cause_prioritization,	cause_import_biosecurity,	cause_import_climate_change,	cause_import_nuclear_security,	cause_import_ai,	cause_import_mental_health,	cause_import_poverty,	cause_import_rationality,	cause_import_meta,	cause_import_xrisk_other,	cause_import_other)))
+EAS2<- (subset(EAS, select = c(cause_import_animal_welfare,	
+                               cause_import_cause_prioritization,	
+                               cause_import_biosecurity,	
+                               cause_import_climate_change,
+                               cause_import_nuclear_security,
+                               cause_import_ai,	
+                               cause_import_mental_health,
+                               cause_import_poverty,	
+                               cause_import_rationality,
+                               cause_import_meta,	
+                               cause_import_xrisk_other
+                               )))
+
+levels(EAS2$cause_import_animal_welfare)<-c("I do not think any resources should be devoted to this cause", 
+                                            "I do not think this is a priority, but should receive some resources",
+                                            NA,  
+                                            "This cause deserves significant resources, but less than the top priorities", 
+                                            "This cause should be a near-top priority", 
+                                            "This cause should be the top priority (Please choose one)")
+levels(EAS2$cause_import_cause_prioritization)<-c("I do not think any resources should be devoted to this cause", 
+                                            "I do not think this is a priority, but should receive some resources",
+                                            NA,  
+                                            "This cause deserves significant resources, but less than the top priorities", 
+                                            "This cause should be a near-top priority", 
+                                            "This cause should be the top priority (Please choose one)")
+levels(EAS2$cause_import_biosecurity)<-c("I do not think any resources should be devoted to this cause", 
+                                            "I do not think this is a priority, but should receive some resources",
+                                            NA,  
+                                            "This cause deserves significant resources, but less than the top priorities", 
+                                            "This cause should be a near-top priority", 
+                                            "This cause should be the top priority (Please choose one)")
+levels(EAS2$cause_import_climate_change)<-c("I do not think any resources should be devoted to this cause", 
+                                            "I do not think this is a priority, but should receive some resources",
+                                            NA,  
+                                            "This cause deserves significant resources, but less than the top priorities", 
+                                            "This cause should be a near-top priority", 
+                                            "This cause should be the top priority (Please choose one)")
+levels(EAS2$cause_import_nuclear_security)<-c("I do not think any resources should be devoted to this cause", 
+                                            "I do not think this is a priority, but should receive some resources",
+                                            NA,  
+                                            "This cause deserves significant resources, but less than the top priorities", 
+                                            "This cause should be a near-top priority", 
+                                            "This cause should be the top priority (Please choose one)")
+levels(EAS2$cause_import_ai)<-c("I do not think any resources should be devoted to this cause", 
+                                            "I do not think this is a priority, but should receive some resources",
+                                            NA,  
+                                            "This cause deserves significant resources, but less than the top priorities", 
+                                            "This cause should be a near-top priority", 
+                                            "This cause should be the top priority (Please choose one)")
+levels(EAS2$cause_import_mental_health)<-c("I do not think any resources should be devoted to this cause", 
+                                            "I do not think this is a priority, but should receive some resources",
+                                            NA,  
+                                            "This cause deserves significant resources, but less than the top priorities", 
+                                            "This cause should be a near-top priority", 
+                                            "This cause should be the top priority (Please choose one)")
+levels(EAS2$cause_import_poverty)<-c("I do not think any resources should be devoted to this cause", 
+                                            "I do not think this is a priority, but should receive some resources",
+                                            NA,  
+                                            "This cause deserves significant resources, but less than the top priorities", 
+                                            "This cause should be a near-top priority", 
+                                            "This cause should be the top priority (Please choose one)")
+
+levels(EAS2$cause_import_rationality)<-c("I do not think any resources should be devoted to this cause", 
+                                     "I do not think this is a priority, but should receive some resources",
+                                     NA,  
+                                     "This cause deserves significant resources, but less than the top priorities", 
+                                     "This cause should be a near-top priority", 
+                                     "This cause should be the top priority (Please choose one)")
+levels(EAS2$cause_import_meta)<-c("I do not think any resources should be devoted to this cause", 
+                                     "I do not think this is a priority, but should receive some resources",
+                                     NA,  
+                                     "This cause deserves significant resources, but less than the top priorities", 
+                                     "This cause should be a near-top priority", 
+                                     "This cause should be the top priority (Please choose one)")
+levels(EAS2$cause_import_xrisk_other)<-c("I do not think any resources should be devoted to this cause", 
+                                     "I do not think this is a priority, but should receive some resources",
+                                     NA,  
+                                     "This cause deserves significant resources, but less than the top priorities", 
+                                     "This cause should be a near-top priority", 
+                                     "This cause should be the top priority (Please choose one)")
+EAS2<- (subset(EAS, select = c(cause_import_animal_welfare,	
+                               cause_import_cause_prioritization,	
+                               cause_import_biosecurity,	
+                               cause_import_climate_change,
+                               cause_import_nuclear_security,
+                               cause_import_ai,	
+                               cause_import_mental_health,
+                               cause_import_poverty,	
+                               cause_import_rationality,
+                               cause_import_meta,	
+                               cause_import_xrisk_other)))
 ##Fix labels
 EAS2[] <- lapply(EAS2, factor, 
                levels=c("I do not think any resources should be devoted to this cause",
                         "I do not think this is a priority, but should receive some resources",
-                        "Not considered / Not sure",
                         "This cause deserves significant resources, but less than the top priorities",
                         "This cause should be a near-top priority",
                         "This cause should be the top priority (Please choose one)"), 
-               labels = c("No Resources", "Some Resources","Not Sure",  "Significant Resources", "Near-Top Priority", "Top Priority"))
+               labels = c("No Resources", "Some Resources", "Significant Resources", "Near-Top Priority", "Top Priority"))
 str(EAS2)
 
 names(EAS2) = c(cause_import_animal_welfare = "Animal welfare",	
@@ -516,8 +672,11 @@ names(EAS2) = c(cause_import_animal_welfare = "Animal welfare",
                 cause_import_poverty ="Global poverty",	
                 cause_import_rationality ="Improving rationality",
                 cause_import_meta ="Meta charities",	
-                cause_import_xrisk_other ="Other x-risk",
-                cause_import_other ="Other")
+                cause_import_xrisk_other ="Other x-risk"
+                )
+
+
+
 #Plot Likert
 library(likert)
 likert(EAS2)
@@ -527,7 +686,14 @@ title <- "Cause Selections"
 plot(Result,
      type="bar") +ggtitle(title)
 
+##DROP NOT SURE LEVEL
+EAS2$gender_mf[EAS2$gender_ordered== "Male"] <- "Male"
+EAS2$gender_mf[EAS2$gender_ordered== "Female"] <- "Female"
+EAS2$gender_mf <-as.factor(EAS2$gender_mf)
+levels(EAS2$gender_mf)
 #Mean score: table, bar?
+
+
 #NEED TO CREATE NUMERIC e.g. povnum<-as.numer
 #Recode variable to numeric
 EAS2<- na.omit(subset(EAS, select = c(cause_import_animal_welfare,	cause_import_cause_prioritization,	cause_import_biosecurity,	cause_import_climate_change,	cause_import_nuclear_security,	cause_import_ai,	cause_import_mental_health,	cause_import_poverty,	cause_import_rationality,	cause_import_meta,	cause_import_xrisk_other,	cause_import_other)))
@@ -545,6 +711,12 @@ table(top_case,member_local_group)
 table(top_case,member_none_of_the_above)	
 table(top_case,member_other)	
 table(top_case,member_gwwc)
+
+EAS2<- na.omit(subset(EAS, select = c(cause_import_animal_welfare_b, ea_engaged_scale)))
+table(EAS2$ea_engaged_scale, EAS2$cause_import_animal_welfare_b)
+table2 <- table(EAS2$ea_engaged_scale, EAS2$cause_import_animal_welfare_b)
+prop.table(table2)
+
 #? How to create bar for all the above?
 
 #Descriptives: top cause (mean?): gender, gender gap (bar)
