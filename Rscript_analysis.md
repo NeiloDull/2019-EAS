@@ -127,7 +127,8 @@ summary(EAS)
 EASinternal<-read.csv("~/Downloads/2019-ea-survey-INTERNAL-draft7.csv")
 EASinternal$age1 <- as.numeric(EAS$age1)
 gghistogram(EASinternal, x = "age1", bins = 50, 
-            add = "mean",add.params = list(linetype = "dashed", color="red",label = "mean"),main = "Distribution of Age")+ scale_x_continuous(breaks=seq(13,100,5))+ xlab("Age of respondent") + ylab("Number of respondents")  
+            add = "mean",add.params = list(linetype = "dashed", color="red",label = "mean"),main = "Age distribution of EAs")+ scale_x_continuous(breaks=seq(13,100,5))+ xlab("Age of respondent") + ylab("Number of respondents")  +geom_text(aes(x=36, label="Average age, 31", y=250), colour="red", text=element_text(size=11))
+
 mean(EASinternal$age1, na.rm= T)
 median(EASinternal$age1, na.rm= T)
 #Get agegroup stats from Public dataset
@@ -145,7 +146,7 @@ EAS2<- na.omit(subset(EAS, select = c(age)))
 ggplot(EAS2, aes(x = age, fill=age)) +
   geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
   geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
-  labs(title = "Distribution of Age", y = "Percent", x = "")+ theme(legend.position = "none")+ 
+  labs(title = "Age distribution of EAs", y = "Percent", x = "")+ theme(legend.position = "none") + theme_classic()
 
 
 
@@ -165,7 +166,7 @@ ggplot(EAS2, aes(x = gender_ordered, fill=gender_ordered)) +
   geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
   geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
   scale_y_continuous(labels = percent) + theme_classic() +
-  labs(title = "Distribution of Gender", y = "Percent", x = "")+ theme(legend.position = "none")
+  labs(title = "Gender distribution of EAs", y = "Percent", x = "")+ theme(legend.position = "none")
 #Drop "other" from gender
 EAS2$gender_mf[EAS2$gender_ordered== "Male"] <- "Male"
 EAS2$gender_mf[EAS2$gender_ordered== "Female"] <- "Female"
@@ -183,7 +184,7 @@ ggplot(EAS3, aes(x = gender_mf, fill=gender_mf)) +
   geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
   geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
   scale_y_continuous(labels = percent) + theme_classic() +
-  labs(title = "Distribution of Gender", y = "Percent", x = "")+ theme(legend.position = "none")
+  labs(title = "Gender distribution of EAs", y = "Percent", x = "")+ theme(legend.position = "none")
 
 
 ##Education: level (bar)
@@ -220,7 +221,7 @@ ggplot(EAS3, aes(x = educ, fill=educ)) +
   geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
   geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
   scale_y_continuous(labels = percent) + theme_classic() +
-  labs(title = "Distribution of Education", y = "Percent", x = "Type of Education")+ theme(legend.position = "none")
+  labs(title = "Education level of EAs", y = "Percent", x = "Type of Education")+ theme(legend.position = "none")
 #Education: comparisons to 2018 42.6% BA, 30.4% MA, 14.4% PhD, 12% other college, 0.7% Non-College
 
 #Education: disciplines (bar)
@@ -228,8 +229,16 @@ ggplot(EAS3, aes(x = educ, fill=educ)) +
 dat <- read.dta13("~/Downloads/EAS_subject.dta")
 p=ggplot(data=dat)  
 p+geom_bar(stat="identity")+  #
-  aes(x=reorder(dat$subjectstudied,percent,sum),y=percent,label=percent,fill=dat$subjectstudied)+geom_text(aes(label=scales::percent(percent), vjust=0))+scale_y_continuous(labels = percent) + theme_classic() +
-  labs(title = "Subjects studied", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
+  aes(x=reorder(dat$subjectstudied,percent,sum),y=percent,label=percent,fill=dat$subjectstudied)+geom_text(aes(label=scales::percent(percent), hjust=1))+scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Subjects studied by EAs", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
+
+dat <- read.dta13("~/Downloads/EAS_uni.dta")
+p=ggplot(data=dat)  
+p+geom_bar(stat="identity")+  #
+  aes(x=reorder(dat$top10universities,percent,sum),y=percent,label=percent,fill=dat$top10universities)+geom_text(size=3, aes(label=scales::percent(percent), hjust=1))+scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Most attended universities by EAs", y = "Percent of all responses", x = "")+ theme(legend.position = "none")+ coord_flip()
+
+
 
 #All disciplines are in logic class, convert to factor?
 logical_vars <- lapply(EAS, class) == "logical"
@@ -256,8 +265,8 @@ table(university)
 dat <- read.dta13("~/Downloads/EAS_job.dta")
 p=ggplot(data=dat)  
 p+geom_bar(stat="identity")+  #
-  aes(x=reorder(dat$employmenttype,percent,sum),y=percent,label=percent,fill=dat$employmenttype)+geom_text(aes(label=scales::percent(percent), vjust=0))+scale_y_continuous(labels = percent) + theme_classic() +
-  labs(title = "Career status", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
+  aes(x=reorder(dat$employmenttype,percent,sum),y=percent,label=percent,fill=dat$employmenttype)+geom_text(aes(label=scales::percent(percent), hjust=1))+scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Employment/Student status of EAs", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
 
 #employed_full_time employed_part_time employed_self employed_looking employed_not_looking employed_homemaker employed_retired employed_student_part employed_student_full
 
@@ -274,14 +283,14 @@ barplot(prop.table(job), main="Employment Status Distribution",
 dat <- read.dta13("~/Downloads/EAS_experience.dta")
 p=ggplot(data=dat)  
 p+geom_bar(stat="identity")+  #
-  aes(x=reorder(dat$workexperience,percent,sum),y=percent,label=percent,fill=dat$workexperience)+geom_text(aes(label=scales::percent(percent), vjust=0))+scale_y_continuous(labels = percent) + theme_classic() +
-  labs(title = "3 years work or graduate", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
+  aes(x=reorder(dat$workexperience,percent,sum),y=percent,label=percent,fill=dat$workexperience)+geom_text(aes(label=scales::percent(percent), hjust=1))+scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Areas EAs have 3 years of work or graduate experience in", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
 
 dat <- read.dta13("~/Downloads/EAS_careerpath.dta")
 p=ggplot(data=dat)  
 p+geom_bar(stat="identity")+  #
-  aes(x=reorder(dat$careerpath,percent,sum),y=percent,label=percent,fill=dat$careerpath)+geom_text(aes(label=scales::percent(percent), vjust=0))+scale_y_continuous(labels = percent) + theme_classic() +
-  labs(title = "Expected career path", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
+  aes(x=reorder(dat$careerpath,percent,sum),y=percent,label=percent,fill=dat$careerpath)+geom_text(aes(label=scales::percent(percent), hjust=1))+scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Expected career paths of EAs", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
 
 
 table(field)
@@ -291,6 +300,14 @@ table2 <- table(field)
 barplot(prop.table(field), main="Field of employment Distribution",
         xlab="Field of employment ",ylab = "Proportion")
 #Geography: country- descriptives (bar or map)
+
+dat <- read.dta13("~/Downloads/EAS_country.dta")
+p=ggplot(data=dat)  
+p+geom_bar(stat="identity")+  #
+  aes(x=reorder(dat$country,percent,sum),y=percent,label=percent,fill=dat$country)+geom_text(aes(label=scales::percent(percent), hjust=1))+scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Countries EAs most often come from", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
+
+
 table(country)
 barplot(table(country), main="Geographic Distribution",
         xlab="Country",ylab = "Frequency")
@@ -311,8 +328,8 @@ table(race)
 dat <- read.dta13("~/Downloads/EAS_race1.dta")
 p=ggplot(data=dat)  
 p+geom_bar(stat="identity")+  #
-  aes(x=reorder(dat$raceethnicity,percent,sum),y=percent,label=percent,fill=dat$raceethnicity)+geom_text(aes(label=scales::percent(percent), vjust=0))+scale_y_continuous(labels = percent) + theme_classic() +
-  labs(title = "Race/Ethnicity", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
+  aes(x=reorder(dat$raceethnicity,percent,sum),y=percent,label=percent,fill=dat$raceethnicity)+geom_text(aes(label=scales::percent(percent), hjust=1))+scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Race/Ethnicity distribution of EAs", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
 
 #Religion: descriptives
 table(religion)
@@ -327,9 +344,9 @@ EAS3$veg_c = factor(EAS3$veg,levels(EAS3$veg)[c(4,3,1,6,5,2)])
 print(levels(EAS3$veg_c))
 p<-ggplot(EAS3, aes(x = veg_c, fill=veg_c)) +
   geom_bar(na.rm = TRUE,aes(y = (..count..)/sum(..count..))) +
-  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", hjust = 1) +
   scale_y_continuous(labels = percent) + theme_classic() +
-  labs(title = "Diet", y = "Percent", x = "Type of Diet")+ theme(legend.position = "none")
+  labs(title = "Diets of EAs", y = "Percent", x = "")+ theme(legend.position = "none")
 p + coord_flip()
 
 #Education: comparisons to 2018 42.6% BA, 30.4% MA, 14.4% PhD, 12% other college, 0.7% Non-College
@@ -337,8 +354,8 @@ p + coord_flip()
 dat <- read.dta13("~/Downloads/EAS_religion.dta")
 p=ggplot(data=dat)  
 p+geom_bar(stat="identity")+  #
-  aes(x=reorder(dat$religion,percent,sum),y=percent,label=percent,fill=dat$religion)+geom_text(aes(label=scales::percent(percent), vjust=0))+scale_y_continuous(labels = percent) + theme_classic() +
-  labs(title = "Religious Affiliation", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
+  aes(x=reorder(dat$religion,percent,sum),y=percent,label=percent,fill=dat$religion)+geom_text(aes(label=scales::percent(percent), hjust=1))+scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Religious affiliations of EAs", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
 
 
 #Politics: descriptives
@@ -346,8 +363,8 @@ p+geom_bar(stat="identity")+  #
 dat <- read.dta13("~/Downloads/EAS_politics.dta")
 p=ggplot(data=dat)  
 p+geom_bar(stat="identity")+  #
-  aes(x=reorder(dat$politicalbelief,percent,sum),y=percent,label=percent,fill=dat$politicalbelief)+geom_text(aes(label=scales::percent(percent), vjust=0))+scale_y_continuous(labels = percent) + theme_classic() +
-  labs(title = "Political Beliefs", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
+  aes(x=reorder(dat$politicalbelief,percent,sum),y=percent,label=percent,fill=dat$politicalbelief)+geom_text(aes(label=scales::percent(percent), hjust=1))+scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Political beliefs of EAs", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
 
 table(politics)
 #Politics: comparison to 2018
@@ -355,16 +372,16 @@ table(politics)
 dat <- read.dta13("~/Downloads/EAS_morals.dta")
 p=ggplot(data=dat)  
 p+geom_bar(stat="identity")+  #
-  aes(x=reorder(dat$moralview,percent,sum),y=percent,label=percent,fill=dat$moralview)+geom_text(aes(label=scales::percent(percent), vjust=0))+scale_y_continuous(labels = percent) + theme_classic() +
-  labs(title = "Moral View", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
+  aes(x=reorder(dat$moralview,percent,sum),y=percent,label=percent,fill=dat$moralview)+geom_text(aes(label=scales::percent(percent), hjust=1))+scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Moral views of EAs", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
 
 table(normative)
 #Morality: metaethics: descriptives
 dat <- read.dta13("~/Downloads/EAS_ethics.dta")
 p=ggplot(data=dat)  
 p+geom_bar(stat="identity")+  #
-  aes(x=reorder(dat$leantowards,percent,sum),y=percent,label=percent,fill=dat$leantowards)+geom_text(aes(label=scales::percent(percent), vjust=0))+scale_y_continuous(labels = percent) + theme_classic() +
-  labs(title = "Ethical View", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
+  aes(x=reorder(dat$leantowards,percent,sum),y=percent,label=percent,fill=dat$leantowards)+geom_text(aes(label=scales::percent(percent), hjust=1))+scale_y_continuous(labels = percent) + theme_classic() +
+  labs(title = "Ethical views of EAs", y = "Percent", x = "")+ theme(legend.position = "none")+ coord_flip()
 
 table(metaethics)
 ##### Where First Heard and Get Involved######################
@@ -686,12 +703,19 @@ title <- "Cause Selections"
 plot(Result,
      type="bar") +ggtitle(title)
 
-##DROP NOT SURE LEVEL
-EAS2$gender_mf[EAS2$gender_ordered== "Male"] <- "Male"
-EAS2$gender_mf[EAS2$gender_ordered== "Female"] <- "Female"
-EAS2$gender_mf <-as.factor(EAS2$gender_mf)
-levels(EAS2$gender_mf)
-#Mean score: table, bar?
+##Top Priorities
+lapply(EAS2[, c("Animal welfare", "Global poverty", "AI risk", "Cause prioritization","Climate change","Biosecurity","Other x-risk","Meta charities","Improving rationality","Nuclear security","Mental health" )], table)
+
+#Mean score: table
+str(EAS2$`Animal welfare`)
+factor_vars <- lapply(EAS2, class) == "factor"
+EAS2[, factor_vars] <- lapply(EAS2[, factor_vars], as.numeric)
+
+summary(EAS2)
+
+
+#Stats
+
 
 
 #NEED TO CREATE NUMERIC e.g. povnum<-as.numer
