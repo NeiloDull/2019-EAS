@@ -1,4 +1,4 @@
-c***EA DRAFt 10
+***EA DRAFt 10
 
 **INTERNAL
 
