@@ -544,6 +544,8 @@ sp + stat_cor(aes(label = paste(..rr.label.., ..p.label.., sep = "~`,`~")), labe
 ##INCOME DONATIONS CORRELATION
 library(haven)
 EAS <- read_dta("EAS_dropped1dta.dta")
+library(haven)
+EAS <- read_dta("Downloads/EAS_currency.dta")
 
 EAS$donate_new <-as.numeric(EAS$donate_new)
 EAS$donate_log10<-as.numeric(EAS$donate_log10)
