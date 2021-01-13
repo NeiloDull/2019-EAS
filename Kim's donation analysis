@@ -1,0 +1,143 @@
+rm(list=ls())
+library(nlme)
+library(corrplot)
+EAS <- read.dta13("~/Downloads/EAS_currency.dta")
+
+
+#predictors of donate_new
+EAnew <- EAS[,c("donate_new","income_new", "yearsinea", "student", "gwwc_member")]
+
+summary(EAnew)
+#look for outliers
+outinc=max(EAnew$income_new,na.rm=TRUE)
+outinc
+
+#remove the 70M point
+EAS1=EAnew[(EAnew$income_new<7000000 ),]
+summary(EAS1$income_new)
+
+EAS=EAS1[(EAS1$student==FALSE ),]
+
+
+#log transform
+EASl=EAS
+EASl[,1:2]=log(EASl[,1:2])
+summary(EASl)
+
+#remove all the infs from logging
+EASt=EASl
+EASt=EASt[(!is.infinite(EASt[,1])),]
+EASt=EASt[(!is.infinite(EASt[,2])),]
+
+#scale logged data
+scars=scale((EASt[,1:2]))
+EASt[,1:2]=scale(EASt[,1:2])
+summary(EASt)
+
+# Save scaled attibutes:
+
+scaleList <- list(scale = attr(scars, "scaled:scale"),
+                  center = attr(scars, "scaled:center"))
+
+#check for correlations among numerical explanatory variables
+sub=data.frame(ldonate=(EASt[,1]),lincome_ind=(EASt[,2]),
+               year=EASt[,3], member_gwwc=EASt$gwwc_member)
+M<-cor(sub[,1:3], use="complete.obs")
+head(round(M,2))
+corrplot(M, type="upper")
+
+#first model with multiple non-iteracting factors (exclude household which correlates with ind_income)
+
+dlm<-lm((donate_new)~(income_new)+yearsinea+factor(gwwc_member), data=EASt, na.action=na.exclude)
+
+#check for regression assumptions
+layout(matrix(1:4,2,2))
+plot(dlm)
+
+#access regression
+summary(dlm)
+AIC(dlm)
+
+
+# model with JUST income
+dlmbas<-lm(donate_new~income_new,data=EASt, na.action=na.exclude)
+summary(dlmbas)
+
+AIC(dlmbas)
+#remove all NAs in order to run backwards elimination
+EAStn = na.omit(EASt)
+summary(EAStn)
+
+
+#set up only intercept model
+null=lm(donate_new~1, data=EAStn, na.action=na.exclude)
+
+#set up all pairwise interactions model
+full=lm(donate_new~(.)^2, data=EAStn, na.action=na.exclude)
+step(null, scope=list(lower=null, upper=full), direction="forward",na.action=na.exclude)
+
+
+#step back thu full model
+sback<-step(full, data=EAStn, direction="backward", trace=0)
+sback$anova
+summary(sback)
+
+
+
+#step forward and back between null and full
+sboth<-step(null, scope = list(upper=full), data=EAStn, direction="both",trace=0)
+sboth$anova
+summary(sboth)
+
+
+#plot the model rescaling back to original data
+
+#colour-code the interactions
+
+for (i in 1:nrow(EAStn)){
+  if (!is.na(EAStn$gwwc_member[i])){
+    
+    if(EAStn$gwwc_member[i]=="Member") {EAStn$fact[i]="#009E73"}
+    else if(EAStn$gwwc_member[i]=="no") {EAStn$fact[i]="#E69F00"}
+
+    
+    
+  }else {EAStn$fact[i]="gray"}
+  
+  
+}
+cscal=as.data.frame(scaleList)
+options(scipen=999)
+layout(matrix(1:1,1,1))
+##MAKE 3 WAY INTERACTION MODEL THE DEFAULT
+dlm=sback
+reEA=EAStn
+reEA[,1]=(reEA[,1])*cscal$`scale`[1]+cscal$center[1]
+reEA[,2]=(reEA[,2])*cscal$`scale`[2]+cscal$center[2]
+
+
+reEA[,1:2]=exp(reEA[,1:2])
+plot(reEA$donate_new~reEA$income_new, log="xy",col=reEA$fact, cex.lab=1,pch=20,xlab="$ individual income", ylab=("$ donations")) + title("Donations against income with regression lines (non-students)")
+#plot(EASt$donate_new~EASt$income_new, col=EASt$fact, pch=20,xlab="log individual income", ylab=("log donations"))
+mEA=mean(reEA$yearsinea, na.rm=TRUE)
+
+pdat=data.frame(income_new=seq(from=-5.75, to=2.5, by=0.1), yearsinea=mEA, gwwc_member="Member")
+outp=predict(dlm, pdat, type="response")
+
+outp=outp*cscal$`scale`[1]+cscal$center[1]
+pdat$income_new=pdat$income_new*cscal$`scale`[2]+cscal$center[2]
+lines(lowess(exp(outp)~exp(pdat$income_new)), col="#009E73", lwd=2)
+
+
+
+pdat1=data.frame(income_new=seq(from=-5.75, to=2.5, by=0.1), yearsinea=mEA,  gwwc_member="no")
+outp1=predict(dlm, pdat1, type="response")
+outp1=outp1*cscal$`scale`[1]+cscal$center[1]
+pdat1$income_new=pdat1$income_new*cscal$`scale`[2]+cscal$center[2]
+lines(lowess(exp(outp1)~exp(pdat$income_new)), col="#E69F00", lwd=2)
+
+legend("topleft", c("GWWC Member", "Non-member"),
+       pch=20, lty=1, col=c("#009E73","#E69F00"), bty="n")
+
+
+
